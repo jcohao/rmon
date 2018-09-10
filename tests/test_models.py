@@ -28,3 +28,17 @@ class TestServer:
         server.delete()
         assert Server.query.count() == 0
 
+    def test_ping_success(self, db, server):
+
+        assert server.ping() is True
+
+    def test_ping_failed(self, db):
+        # 没有服务器监听在6399上，所以访问将失败
+        server = Server(name='test', host='127.0.0.1', port=6399)
+        
+        try:
+            server.ping()
+        except RestException as e:
+            assert e.code == 400
+            assert e.message == 'redis server %s can not connected' % server.host
+
